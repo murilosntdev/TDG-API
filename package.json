@@ -1,0 +1,29 @@
+{
+  "name": "tdg-api",
+  "version": "0.0.1",
+  "description": "Truco da Galera API with Express",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/murilosntdev/TDG-API.git"
+  },
+  "author": "murilosntdev",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/murilosntdev/TDG-API/issues"
+  },
+  "homepage": "https://github.com/murilosntdev/TDG-API#readme",
+  "dependencies": {
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
