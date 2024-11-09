@@ -31,4 +31,14 @@ app.get("/", (req, res) => {
     })
 });
 
+app.use((req, res) => {
+    res.status(404);
+    res.json({
+        error: {
+            status: 404,
+            message: "Rota Não Encontrada"
+        }
+    })
+});
+
 app.listen(port, () => console.log(`Server Running on port ${process.env.EXPRESS_PORT}...`));
