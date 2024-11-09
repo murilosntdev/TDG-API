@@ -14,5 +14,5 @@ export const validateUsername = (content, fieldName) => {
         return { [fieldName]: `O campo '${fieldName}' contém caracteres inválidos` };
     };
 
-    return 'validUsername'
+    return 'validUsername';
 };
