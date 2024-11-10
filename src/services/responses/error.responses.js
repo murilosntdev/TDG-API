@@ -4,9 +4,19 @@ export const errorResponse = (statusCode, details, debugInfo) => {
     };
 
     switch (statusCode) {
+        case 409: {
+            response.error.status = 409;
+            response.error.message = "Houve Um Conflito No Servidor";
+            break;
+        };
         case 422: {
             response.error.status = 422;
             response.error.message = "Entidade Não Processável";
+            break;
+        };
+        case 503: {
+            response.error.status = 503;
+            response.error.message = "Serviço Indisponível";
             break;
         };
         default: {

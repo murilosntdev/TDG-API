@@ -2,6 +2,7 @@ import compression from "compression";
 import cors from "cors";
 import express from "express";
 import * as dotenv from "dotenv";
+import accountRouter from "./routes/account.routes.js";
 
 dotenv.config();
 
@@ -28,8 +29,10 @@ app.get("/", (req, res) => {
                 documentation: "https://github.com/murilosntdev/TDG-API"
             }
         }
-    })
+    });
 });
+
+app.use("/account", accountRouter);
 
 app.use((req, res) => {
     res.status(404);
@@ -38,7 +41,7 @@ app.use((req, res) => {
             status: 404,
             message: "Rota Não Encontrada"
         }
-    })
+    });
 });
 
 app.listen(port, () => console.log(`Server Running on port ${process.env.EXPRESS_PORT}...`));
