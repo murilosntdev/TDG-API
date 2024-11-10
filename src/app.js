@@ -3,6 +3,7 @@ import cors from "cors";
 import express from "express";
 import * as dotenv from "dotenv";
 import accountRouter from "./routes/account.routes.js";
+import sessionRouter from "./routes/session.routes.js";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/account", accountRouter);
+app.use("/session", sessionRouter);
 
 app.use((req, res) => {
     res.status(404);
