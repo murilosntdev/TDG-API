@@ -1,5 +1,5 @@
 import * as bcrypt from "bcrypt";
-import { selectIdUsernameEmailPasswordByUsername } from "../models/Session.js";
+import { selectIdByToken, selectIdUsernameEmailPasswordByUsername } from "../models/Session.js";
 import { errorResponse } from "../services/responses/error.responses.js";
 import { validateStringField } from "../services/validators/fieldFormat.validators.js"
 import { validatePassword } from "../services/validators/password.validators.js";
@@ -124,6 +124,74 @@ export const checkRefreshTokenPreviousConditions = (req, res, next) => {
 
     req.body.account_id = decodedRefreshToken.account_id;
     req.body.username = decodedRefreshToken.username;
+
+    next();
+};
+
+export const validateLogoutInput = (req, res, next) => {
+    const cookieHeader = req.headers.cookie;
+    const cookies = cookieHeader ? (
+        Object.fromEntries(
+            cookieHeader.split('; ').map(cookie => {
+                const [name, ...rest] = cookie.split('=');
+                return [name, rest.join('=')];
+            })
+        )
+    ) : {};
+
+    const bearerToken = cookies.bearer_token;
+
+    let inputErrors = [];
+
+    if (!bearerToken) {
+        inputErrors.push({ bearer_token: "O cookie 'bearer_token' é obrigatório" });
+    } else {
+        let validbearerToken = validateStringField(bearerToken, 'bearer_token');
+        if (validbearerToken != 'validString') {
+            inputErrors.push(validbearerToken);
+        };
+    };
+
+    if (inputErrors.length > 0) {
+        res.status(422);
+        res.json(errorResponse(422, inputErrors));
+        return;
+    };
+
+    req.body.cookies = cookies;
+
+    next();
+};
+
+export const checkLogoutPreviousConditions = async (req, res, next) => {
+    const bearerToken = req.body.cookies.bearer_token;
+
+    try {
+        verify(bearerToken, process.env.JWT_BEARER_TOKEN_KEY);
+    } catch (error) {
+        res.status(401);
+        res.json(errorResponse(401, "'bearer_token' expirado ou inválido"));
+        return;
+    };
+
+    const verifyBlacklist = await selectIdByToken(bearerToken);
+
+    if (verifyBlacklist.dbError) {
+        res.status(503);
+        res.json(errorResponse(503, null, verifyBlacklist));
+        return;
+    };
+
+    if (verifyBlacklist.rows[0]) {
+        res.status(401);
+        res.json(errorResponse(401, "'bearer_token' expirado ou inválido"));
+        return;
+    };
+
+    const decodedBearerToken = decode(bearerToken, process.env.JWT_BEARER_TOKEN_KEY);
+
+    req.body.account_id = decodedBearerToken.account_id;
+    req.body.expiration = decodedBearerToken.exp;
 
     next();
 };

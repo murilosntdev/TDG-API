@@ -1,5 +1,5 @@
 import jsonwebtoken from "jsonwebtoken";
-import { insertIntoRefreshToken, updateRevokedByAccountId } from "../models/Session.js";
+import { insertIntoBearerTokenBlacklist, insertIntoRefreshToken, updateRevokedByAccountId } from "../models/Session.js";
 import { errorResponse } from "../services/responses/error.responses.js";
 import { successResponse } from "../services/responses/success.responses.js";
 
@@ -110,4 +110,31 @@ export const refreshToken = async (req, res) => {
     res.cookie('refresh_token', refreshToken.rows[0].token, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 2592000000, path: '/' });
     res.json(successResponse(204));
     return;
+};
+
+export const logout = async (req, res) => {
+    const account_id = req.body.account_id;
+    const bearerToken = req.body.cookies.bearer_token;
+    const expiration = req.body.expiration;
+
+    const bearerTokenBlacklist = await insertIntoBearerTokenBlacklist(bearerToken, expiration);
+
+    if (bearerTokenBlacklist.dbError) {
+        res.status(503);
+        res.json(errorResponse(503, null, bearerTokenBlacklist));
+        return;
+    };
+
+    const revokePreviousRefreshToken = await updateRevokedByAccountId(account_id);
+
+    if (revokePreviousRefreshToken.dbError) {
+        res.status(503);
+        res.json(errorResponse(503, null, revokePreviousRefreshToken));
+        return;
+    };
+
+    res.status(204);
+    res.cookie('bearer_token', '', { httpOnly: true, secure: true, sameSite: 'Strict', expires: new Date(0), path: '/' });
+    res.cookie('refresh_token', '', { httpOnly: true, secure: true, sameSite: 'Strict', expires: new Date(0), path: '/' });
+    res.json(successResponse(204));
 };

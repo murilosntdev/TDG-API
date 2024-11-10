@@ -23,3 +23,17 @@ export const insertIntoRefreshToken = async (account_id, token) => {
 
     return (result);
 };
+
+export const insertIntoBearerTokenBlacklist = async (token, expiration) => {
+    let query = "INSERT INTO bearer_token_blacklist (token, expiration) VALUES ($1, TO_TIMESTAMP($2)) RETURNING token";
+    let result = await dbExecute(query, [token, expiration]);
+
+    return (result);
+};
+
+export const selectIdByToken = async (token) => {
+    let query = "SELECT id FROM bearer_token_blacklist WHERE (token = $1)";
+    let result = await dbExecute(query, [token]);
+
+    return (result);
+};
