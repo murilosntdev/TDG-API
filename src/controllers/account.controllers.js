@@ -10,7 +10,7 @@ export const newAccount = async (req, res) => {
 
     const hashPassword = bcrypt.hashSync(password, 10);
 
-    const insertData = await insertIntoAccount(username, email, password);
+    const insertData = await insertIntoAccount(username, email, hashPassword);
 
     if (insertData.dbError) {
         res.status(503);
