@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { checkLoginPreConditions, validadeLoginInput } from "../middlewares/session.middlewares.js";
-import { login } from "../controllers/session.controllers.js";
+import { checkLoginPreviousConditions, checkRefreshTokenPreviousConditions, validadeLoginInput, validadeRefreshTokenInput } from "../middlewares/session.middlewares.js";
+import { login, refreshToken } from "../controllers/session.controllers.js";
 
 const sessionRouter = Router();
 
-sessionRouter.post('/login', validadeLoginInput, checkLoginPreConditions, login);
+sessionRouter.post('/login', validadeLoginInput, checkLoginPreviousConditions, login);
+sessionRouter.post('/refreshToken', validadeRefreshTokenInput, checkRefreshTokenPreviousConditions, refreshToken);
 
 export default sessionRouter;
