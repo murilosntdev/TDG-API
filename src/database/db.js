@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-var pool = '';
+let pool = '';
 
 if (process.env.SYSTEM_ENVIRONMENT === "staging") {
     pool = new pg.Pool({

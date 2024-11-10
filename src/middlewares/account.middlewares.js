@@ -23,7 +23,7 @@ export const validateNewAccountInput = (req, res, next) => {
     if (!email) {
         inputErrors.push({ email: "O campo 'email' é obrigatório" });
     } else {
-        var validEmail = validateEmail(email, "email");
+        let validEmail = validateEmail(email, "email");
         if (validEmail != "validEmail") {
             inputErrors.push(validEmail);
         };
@@ -32,7 +32,7 @@ export const validateNewAccountInput = (req, res, next) => {
     if (!password) {
         inputErrors.push({ password: "O campo 'password' é obrigatório" });
     } else {
-        var validPassword = validatePassword(password, "password");
+        let validPassword = validatePassword(password, "password");
         if (validPassword != "validPassword") {
             inputErrors.push(validPassword);
         };
