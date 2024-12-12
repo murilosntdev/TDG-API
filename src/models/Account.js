@@ -20,3 +20,10 @@ export const insertIntoAccount = async (username, email, hashPassword) => {
 
     return (result);
 };
+
+export const selectInfosById = async (id) => {
+    let query = "SELECT username, email FROM account WHERE (id = $1)";
+    let result = await dbExecute(query, [id]);
+
+    return (result);
+};

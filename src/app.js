@@ -13,7 +13,7 @@ const app = express();
 app.use(compression());
 app.use(express.json());
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: JSON.parse(process.env.CORS_ORIGIN),
     methods: ["GET"],
     credentials: true
 }));
