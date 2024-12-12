@@ -5,6 +5,7 @@ import { validateStringField } from "../services/validators/fieldFormat.validato
 import { validatePassword } from "../services/validators/password.validators.js";
 import { validateUsername } from "../services/validators/username.validators.js";
 import jsonwebtoken from "jsonwebtoken";
+import { cookiesExtractor } from "../services/requests/cookiesExtractor.requests.js";
 
 const { verify, decode } = jsonwebtoken;
 
@@ -74,43 +75,16 @@ export const checkLoginPreviousConditions = async (req, res, next) => {
     next();
 };
 
-export const validadeRefreshTokenInput = (req, res, next) => {
-    const cookieHeader = req.headers.cookie;
-    const cookies = cookieHeader ? (
-        Object.fromEntries(
-            cookieHeader.split('; ').map(cookie => {
-                const [name, ...rest] = cookie.split('=');
-                return [name, rest.join('=')];
-            })
-        )
-    ) : {};
+export const checkRefreshTokenPreviousConditions = (req, res, next) => {
+    cookiesExtractor(req);
 
-    const refreshToken = cookies.refresh_token;
-
-    let inputErrors = [];
+    const refreshToken = req.body.cookies.refresh_token;
 
     if (!refreshToken) {
-        inputErrors.push({ refresh_token: "O cookie 'refresh_token' é obrigatório" });
-    } else {
-        let validRefreshToken = validateStringField(refreshToken, 'refresh_token');
-        if (validRefreshToken != 'validString') {
-            inputErrors.push(validRefreshToken);
-        };
-    };
-
-    if (inputErrors.length > 0) {
-        res.status(422);
-        res.json(errorResponse(422, inputErrors));
+        res.status(401);
+        res.json(errorResponse(401, "O cookie 'refresh_token' é obrigatório"));
         return;
     };
-
-    req.body.cookies = cookies;
-
-    next();
-};
-
-export const checkRefreshTokenPreviousConditions = (req, res, next) => {
-    const refreshToken = req.body.cookies.refresh_token;
 
     try {
         verify(refreshToken, process.env.JWT_REFRESH_TOKEN_KEY);
@@ -128,43 +102,16 @@ export const checkRefreshTokenPreviousConditions = (req, res, next) => {
     next();
 };
 
-export const validateLogoutInput = (req, res, next) => {
-    const cookieHeader = req.headers.cookie;
-    const cookies = cookieHeader ? (
-        Object.fromEntries(
-            cookieHeader.split('; ').map(cookie => {
-                const [name, ...rest] = cookie.split('=');
-                return [name, rest.join('=')];
-            })
-        )
-    ) : {};
+export const checkLogoutPreviousConditions = async (req, res, next) => {
+    cookiesExtractor(req);
 
-    const bearerToken = cookies.bearer_token;
-
-    let inputErrors = [];
+    const bearerToken = req.body.cookies.bearer_token;
 
     if (!bearerToken) {
-        inputErrors.push({ bearer_token: "O cookie 'bearer_token' é obrigatório" });
-    } else {
-        let validbearerToken = validateStringField(bearerToken, 'bearer_token');
-        if (validbearerToken != 'validString') {
-            inputErrors.push(validbearerToken);
-        };
-    };
-
-    if (inputErrors.length > 0) {
-        res.status(422);
-        res.json(errorResponse(422, inputErrors));
+        res.status(401);
+        res.json(errorResponse(401, "O cookie 'bearer_token' é obrigatório"));
         return;
     };
-
-    req.body.cookies = cookies;
-
-    next();
-};
-
-export const checkLogoutPreviousConditions = async (req, res, next) => {
-    const bearerToken = req.body.cookies.bearer_token;
 
     try {
         verify(bearerToken, process.env.JWT_BEARER_TOKEN_KEY);

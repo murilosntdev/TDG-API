@@ -1,5 +1,6 @@
 import { selectIdByEmail, selectIdByUsername } from "../models/Account.js";
 import { selectIdByToken } from "../models/Session.js";
+import { cookiesExtractor } from "../services/requests/cookiesExtractor.requests.js";
 import { errorResponse } from "../services/responses/error.responses.js";
 import { validateEmail } from "../services/validators/email.validators.js";
 import { validateStringField } from "../services/validators/fieldFormat.validators.js";
@@ -83,43 +84,16 @@ export const checkNewAccountPreviousConditions = async (req, res, next) => {
     next();
 };
 
-export const validateInfosInput = (req, res, next) => {
-    const cookieHeader = req.headers.cookie;
-    const cookies = cookieHeader ? (
-        Object.fromEntries(
-            cookieHeader.split('; ').map(cookie => {
-                const [name, ...rest] = cookie.split('=');
-                return [name, rest.join('=')];
-            })
-        )
-    ) : {};
+export const checkInfosPreviousConditions = async (req, res, next) => {
+    cookiesExtractor(req);
 
-    const bearerToken = cookies.bearer_token;
-
-    let inputErrors = [];
+    const bearerToken = req.body.cookies.bearer_token;
 
     if (!bearerToken) {
-        inputErrors.push({ bearer_token: "O cookie 'bearer_token' é obrigatório" });
-    } else {
-        let validbearerToken = validateStringField(bearerToken, 'bearer_token');
-        if (validbearerToken != 'validString') {
-            inputErrors.push(validbearerToken);
-        };
-    };
-
-    if (inputErrors.length > 0) {
-        res.status(422);
-        res.json(errorResponse(422, inputErrors));
+        res.status(401);
+        res.json(errorResponse(401, "O cookie 'bearer_token' é obrigatório"));
         return;
     };
-
-    req.body.cookies = cookies;
-
-    next();
-};
-
-export const checkInfosPreviousConditions = async (req, res, next) => {
-    const bearerToken = req.body.cookies.bearer_token;
 
     try {
         verify(bearerToken, process.env.JWT_BEARER_TOKEN_KEY);
