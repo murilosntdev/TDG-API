@@ -2,6 +2,8 @@ import compression from "compression";
 import cors from "cors";
 import express from "express";
 import * as dotenv from "dotenv";
+import http from "http";
+import initWebSocket from "../socket/socket.js";
 import accountRouter from "./routes/account.routes.js";
 import sessionRouter from "./routes/session.routes.js";
 
@@ -46,4 +48,8 @@ app.use((req, res) => {
     });
 });
 
-app.listen(port, () => console.log(`Server Running on port ${process.env.EXPRESS_PORT}...`));
+const server = http.createServer(app);
+
+initWebSocket(server);
+
+server.listen(port, () => console.log(`Server Running on port ${process.env.EXPRESS_PORT}...`));

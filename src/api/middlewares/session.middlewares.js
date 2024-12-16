@@ -1,7 +1,6 @@
 import * as bcrypt from "bcrypt";
 import { selectIdByToken, selectIdUsernameEmailPasswordByUsername } from "../models/Session.js";
 import { errorResponse } from "../services/responses/error.responses.js";
-import { validateStringField } from "../services/validators/fieldFormat.validators.js"
 import { validatePassword } from "../services/validators/password.validators.js";
 import { validateUsername } from "../services/validators/username.validators.js";
 import jsonwebtoken from "jsonwebtoken";

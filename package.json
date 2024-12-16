@@ -1,11 +1,11 @@
 {
   "name": "tdg-api",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Truco da Galera API with Express",
-  "main": "src/app.js",
+  "main": "src/api/app.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon src/app.js"
+    "start": "nodemon src/api/app.js"
   },
   "repository": {
     "type": "git",
@@ -24,7 +24,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
