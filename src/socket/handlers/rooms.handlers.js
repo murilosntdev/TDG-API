@@ -55,3 +55,13 @@ function removePlayerFromCurrentRoom(socket) {
 
     return;
 };
+
+export function findRoomsHandler(socket) {
+    const rooms = Object.entries(activeRooms).map(([roomId, roomData]) => ({
+        roomId,
+        roomName: roomData.name,
+        players: roomData.players.length
+    }));
+
+    socket.emit("rooms", { rooms });
+};
