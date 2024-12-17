@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import { authMiddleware } from "./middlewares/auth.middlewares.js";
+import { createRoomHandler } from "./handlers/rooms.handlers.js";
 
 export default function initWebSocket(server) {
     const io = new Server(server, {
@@ -27,5 +28,7 @@ export default function initWebSocket(server) {
         };
 
         socket.emit("connectionSuccess", responseMessage);
+
+        socket.on("createRoom", (body) => createRoomHandler(socket, body));
     });
 };

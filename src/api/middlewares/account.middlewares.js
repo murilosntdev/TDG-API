@@ -3,7 +3,6 @@ import { selectIdByToken } from "../models/Session.js";
 import { cookiesExtractor } from "../services/requests/cookiesExtractor.requests.js";
 import { errorResponse } from "../services/responses/error.responses.js";
 import { validateEmail } from "../services/validators/email.validators.js";
-import { validateStringField } from "../services/validators/fieldFormat.validators.js";
 import { validatePassword } from "../services/validators/password.validators.js";
 import { validateUsername } from "../services/validators/username.validators.js";
 import jsonwebtoken from "jsonwebtoken";
