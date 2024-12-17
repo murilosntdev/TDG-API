@@ -106,7 +106,7 @@ export const refreshToken = async (req, res) => {
     );
 
     res.status(204);
-    res.cookie('bearer_token', jwtBearerToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 10800000, path: '/' });
+    res.cookie('bearer_token', jwtBearerToken, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge: 10800000, path: '/' });
     res.cookie('refresh_token', refreshToken.rows[0].token, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 2592000000, path: '/' });
     res.json(successResponse(204));
     return;
@@ -134,7 +134,7 @@ export const logout = async (req, res) => {
     };
 
     res.status(204);
-    res.cookie('bearer_token', '', { httpOnly: true, secure: true, sameSite: 'Strict', expires: new Date(0), path: '/' });
+    res.cookie('bearer_token', '', { httpOnly: false, secure: true, sameSite: 'Strict', expires: new Date(0), path: '/' });
     res.cookie('refresh_token', '', { httpOnly: true, secure: true, sameSite: 'Strict', expires: new Date(0), path: '/' });
     res.json(successResponse(204));
 };

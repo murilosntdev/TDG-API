@@ -9,6 +9,11 @@ export const errorResponse = (statusCode, details, debugInfo) => {
             response.error.message = "Não Autorizado";
             break;
         };
+        case 403: {
+            response.error.status = 403;
+            response.error.message = "Acesso Proibido";
+            break;
+        }
         case 404: {
             response.error.status = 404;
             response.error.message = "Entidade Não Encontrada";
