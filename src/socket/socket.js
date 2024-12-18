@@ -16,12 +16,12 @@ export default function initWebSocket(server) {
         const responseMessage = {
             "status": "success",
             "message": "Conexão bem-sucedida",
-            "data": {
-                "user": {
+            "details": {
+                "user_info": {
                     "username": socket.user,
                     "socket_id": socket.id
                 },
-                "server": {
+                "server_info": {
                     "connected_users": io.sockets.sockets.size
                 }
             }

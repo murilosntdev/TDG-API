@@ -3,14 +3,14 @@ import { validateRoomName } from "../services/validators/roomName.validators.js"
 const activeRooms = {};
 
 export function createRoomHandler(socket, body) {
-    const roomName = body.roomName;
+    const roomName = body.room_name;
 
     let inputErrors = [];
 
     if (!roomName) {
-        inputErrors.push({ "roomName": "o campo 'roomName' é obrigatório" });
+        inputErrors.push({ "room_name": "o campo 'room_name' é obrigatório" });
     } else {
-        let validRoomName = validateRoomName(roomName, "roomName");
+        let validRoomName = validateRoomName(roomName, "room_name");
 
         if (validRoomName != "validRoomName") {
             inputErrors.push(validRoomName);
@@ -20,7 +20,8 @@ export function createRoomHandler(socket, body) {
     if (inputErrors.length > 0) {
         const responseMessage = {
             "status": "error",
-            "data": inputErrors
+            "message": "Erro de input",
+            "details": inputErrors
         };
 
         socket.emit("error", responseMessage);
@@ -38,7 +39,18 @@ export function createRoomHandler(socket, body) {
         players: [socket.id]
     };
 
-    socket.emit("roomCreated", { roomId, roomName });
+    const responseMessage = {
+        "status": "success",
+        "message": "Sala criada",
+        "details": {
+            "room_info": {
+                id: roomId,
+                name: roomName
+            }
+        }
+    };
+
+    socket.emit("roomCreated", responseMessage);
 };
 
 function removePlayerFromCurrentRoom(socket) {
