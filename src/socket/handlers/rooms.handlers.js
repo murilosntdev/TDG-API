@@ -70,10 +70,16 @@ function removePlayerFromCurrentRoom(socket) {
 
 export function findRoomsHandler(socket) {
     const rooms = Object.entries(activeRooms).map(([roomId, roomData]) => ({
-        roomId,
-        roomName: roomData.name,
+        id: roomId,
+        name: roomData.name,
         players: roomData.players.length
     }));
 
-    socket.emit("rooms", { rooms });
+    const responseMessage = {
+        status: "success",
+        message: "Salas encontradas",
+        details: rooms
+    }
+
+    socket.emit("rooms", responseMessage);
 };
