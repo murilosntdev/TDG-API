@@ -1,6 +1,6 @@
 {
   "name": "tdg-api",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Truco da Galera API with Express",
   "main": "src/api/app.js",
   "type": "module",

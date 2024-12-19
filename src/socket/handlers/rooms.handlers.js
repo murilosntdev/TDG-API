@@ -1,7 +1,7 @@
 import { validateRoomName } from "../services/validators/roomName.validators.js";
 import { validateRoomId } from "../services/validators/roomId.validators.js";
 
-const activeRooms = {};
+export const activeRooms = {};
 
 export function createRoomHandler(socket, body) {
     const roomName = body.room_name;
