@@ -37,7 +37,7 @@ export function createRoomHandler(socket, body) {
 
     activeRooms[roomId] = {
         name: roomName,
-        players: [socket.user]
+        players: []
     };
 
     const responseMessage = {
@@ -111,6 +111,8 @@ export function joinRoomHandler(socket, body) {
         return;
     };
 
+    removePlayerFromCurrentRoom(socket);
+
     const room = activeRooms[roomId];
 
     if (!room) {
@@ -123,8 +125,6 @@ export function joinRoomHandler(socket, body) {
         socket.emit("error", responseMessage);
         return;
     };
-
-    removePlayerFromCurrentRoom(socket);
 
     socket.join(roomId);
     room.players.push(socket.user);
@@ -140,7 +140,66 @@ export function joinRoomHandler(socket, body) {
                 "players_usernames": activeRooms[roomId].players
             }
         }
-    }
+    };
 
     socket.emit("roomJoined", responseMessage);
+};
+
+export function leaveRoomHandler(socket, body) {
+    const roomId = body.room_id;
+
+    let inputErrors = [];
+
+    if (!roomId) {
+        inputErrors.push({ "room_id": "o campo 'room_id' é obrigatório" });
+    } else {
+        let validRoomId = validateRoomId(roomId, "room_id");
+
+        if (validRoomId != "validRoomId") {
+            inputErrors.push(validRoomId);
+        };
+    };
+
+    if (inputErrors.length > 0) {
+        const responseMessage = {
+            "status": "error",
+            "message": "Erro de input",
+            "details": inputErrors
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    const room = activeRooms[roomId];
+
+    if (!room) {
+        const responseMessage = {
+            "status": "error",
+            "message": "Sala não encontrada",
+            "details": `A sala '${roomId}' não existe`
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    socket.leave(roomId);
+    room.players = room.players.filter((playerUsername) => playerUsername !== socket.user);
+
+    if (room.players.length === 0) {
+        delete activeRooms[roomId];
+    };
+
+    const responseMessage = {
+        "status": "success",
+        "message": "Desconexão com a sala",
+        "details": {
+            "room_info": {
+                "id": roomId
+            }
+        }
+    };
+
+    socket.emit("roomLeft", responseMessage);
 };

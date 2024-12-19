@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { authMiddleware } from "./middlewares/auth.middlewares.js";
-import { createRoomHandler, findRoomsHandler, joinRoomHandler } from "./handlers/rooms.handlers.js";
+import { createRoomHandler, findRoomsHandler, joinRoomHandler, leaveRoomHandler } from "./handlers/rooms.handlers.js";
 
 export default function initWebSocket(server) {
     const io = new Server(server, {
@@ -32,5 +32,6 @@ export default function initWebSocket(server) {
         socket.on("createRoom", (body) => createRoomHandler(socket, body));
         socket.on("findRooms", () => findRoomsHandler(socket));
         socket.on("joinRoom", (body) => joinRoomHandler(socket, body));
+        socket.on("leaveRoom", (body) => leaveRoomHandler(socket, body));
     });
 };
