@@ -1,5 +1,6 @@
 import { validateRoomName } from "../services/validators/roomName.validators.js";
 import { validateRoomId } from "../services/validators/roomId.validators.js";
+import { createGameInstance, addPlayerToGame, removePlayerFromGame, deleteGameInstance } from "./game.handlers.js";
 
 export const activeRooms = {};
 
@@ -36,8 +37,11 @@ export function createRoomHandler(socket, body) {
     socket.join(roomId);
 
     activeRooms[roomId] = {
-        name: roomName,
-        players: []
+        roomInfo: {
+            name: roomName,
+            players: []
+        },
+        gameInstance: createGameInstance()
     };
 
     const responseMessage = {
@@ -56,11 +60,14 @@ export function createRoomHandler(socket, body) {
 
 function removePlayerFromCurrentRoom(socket) {
     for (const [roomId, roomData] of Object.entries(activeRooms)) {
-        if (roomData.players.includes(socket.user)) {
+        if (roomData.roomInfo.players.includes(socket.user)) {
             socket.leave(roomId);
-            roomData.players = roomData.players.filter((playerUsername) => playerUsername !== socket.user);
+            roomData.roomInfo.players = roomData.roomInfo.players.filter((playerUsername) => playerUsername !== socket.user);
 
-            if (roomData.players.length === 0) {
+            removePlayerFromGame(roomData.gameInstance, socket.user);
+
+            if (roomData.roomInfo.players.length === 0) {
+                deleteGameInstance(roomData.gameInstance);
                 delete activeRooms[roomId];
             };
         };
@@ -72,8 +79,8 @@ function removePlayerFromCurrentRoom(socket) {
 export function findRoomsHandler(socket) {
     const rooms = Object.entries(activeRooms).map(([roomId, roomData]) => ({
         id: roomId,
-        name: roomData.name,
-        players: roomData.players.length
+        name: roomData.roomInfo.name,
+        players: roomData.roomInfo.players.length
     }));
 
     const responseMessage = {
@@ -127,7 +134,25 @@ export function joinRoomHandler(socket, body) {
     };
 
     socket.join(roomId);
-    room.players.push(socket.user);
+    room.roomInfo.players.push(socket.user);
+
+    addPlayerToGame(room.gameInstance, socket);
+
+    socket.to(roomId).emit("playerJoined", {
+        "status": "info",
+        "message": `Jogador entrou na sala`,
+        "details": {
+            "player_info": {
+                "username": socket.user
+            },
+            "room_info": {
+                "id": roomId,
+                "name": activeRooms[roomId].roomInfo.name,
+                "players_quantity": activeRooms[roomId].roomInfo.players.length,
+                "players_usernames": activeRooms[roomId].roomInfo.players
+            }
+        }
+    });
 
     const responseMessage = {
         "status": "success",
@@ -135,9 +160,9 @@ export function joinRoomHandler(socket, body) {
         "details": {
             "room_info": {
                 "id": roomId,
-                "name": activeRooms[roomId].name,
-                "players_quantity": activeRooms[roomId].players.length,
-                "players_usernames": activeRooms[roomId].players
+                "name": activeRooms[roomId].roomInfo.name,
+                "players_quantity": activeRooms[roomId].roomInfo.players.length,
+                "players_usernames": activeRooms[roomId].roomInfo.players
             }
         }
     };
@@ -185,9 +210,29 @@ export function leaveRoomHandler(socket, body) {
     };
 
     socket.leave(roomId);
-    room.players = room.players.filter((playerUsername) => playerUsername !== socket.user);
+    room.roomInfo.players = room.roomInfo.players.filter((playerUsername) => playerUsername !== socket.user);
 
-    if (room.players.length === 0) {
+    removePlayerFromGame(room.gameInstance, socket.user);
+
+    socket.to(roomId).emit("playerLeft", {
+        "status": "info",
+        "message": `Jogador saiu da sala`,
+        "details": {
+            "player_info": {
+                "username": socket.user
+            },
+            "room_info": {
+                "id": roomId,
+                "name": activeRooms[roomId].roomInfo.name,
+                "players_quantity": activeRooms[roomId].roomInfo.players.length,
+                "players_usernames": activeRooms[roomId].roomInfo.players
+            }
+        }
+    });
+
+    if (room.roomInfo.players.length === 0) {
+        room.gameInstance = deleteGameInstance(room.gameInstance);
+
         delete activeRooms[roomId];
     };
 
