@@ -1,7 +1,8 @@
 import { validateRoomName } from "../services/validators/roomName.validators.js";
 import { validateRoomId } from "../services/validators/roomId.validators.js";
-import { createGameInstance, addPlayerToGame, removePlayerFromGame, deleteGameInstance, startGame, handsPrediction } from "./game.handlers.js";
+import { createGameInstance, addPlayerToGame, removePlayerFromGame, deleteGameInstance, startGame, handsPrediction, playCard } from "./game.handlers.js";
 import { validateHandsQuantity } from "../services/validators/handsQuantity.validators.js";
+import { validateCard } from "../services/validators/card.validators.js";
 
 export const activeRooms = {};
 
@@ -527,6 +528,141 @@ export function handsPredictionHandler(io, socket, body) {
         socket.emit("error", {
             status: "error",
             message: "Erro ao receber previsão de mãos",
+            details: error.message
+        });
+    };
+};
+
+export function playCardHandler(io, socket, body) {
+    const roomId = body.room_id;
+    const card = body.card;
+
+    let inputErrors = [];
+
+    if (!roomId) {
+        inputErrors.push({ "room_id": "O campo 'room_id' é obrigatório" });
+    } else {
+        let validRoomId = validateRoomId(roomId, "room_id");
+
+        if (validRoomId != "validRoomId") {
+            inputErrors.push(validRoomId);
+        };
+    };
+
+    if (!card) {
+        inputErrors.push({ "card": "O campo 'card' é obrigatório" });
+    } else {
+        let validCard = validateCard(card, "card");
+
+        if (validCard != "validCard") {
+            inputErrors.push(validCard);
+        };
+    };
+
+    if (inputErrors.length > 0) {
+        const responseMessage = {
+            "status": "error",
+            "message": "Erro de input",
+            "details": inputErrors
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    const room = activeRooms[roomId];
+
+    if (!room) {
+        const responseMessage = {
+            "status": "error",
+            "message": "Sala não encontrada",
+            "details": `A sala '${roomId}' não existe`
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    if (!room.roomInfo.players.includes(socket.user)) {
+        const responseMessage = {
+            "status": "error",
+            "message": "Jogador não pertence a sala",
+            "details": `Não foi possível jogar uma carta na sala '${roomId}'`
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    if (room.gameInstance.status !== "awaiting cards") {
+        const responseMessage = {
+            "status": "error",
+            "message": "Status incompatível",
+            "details": `A sala '${roomId}' não está recebendo cartas`
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    try {
+        playCard(io, roomId, room.gameInstance, socket.user, card);
+
+        socket.to(roomId).emit("cardPlayed", {
+            "status": "info",
+            "message": `${socket.user} jogou a carta ${card}`,
+            "details": {
+                "player_info": {
+                    "username": socket.user,
+                    "played_card": card
+                }
+            }
+        });
+
+        const responseMessage = {
+            "status": "success",
+            "message": `Você jogou a carta ${card}`,
+            "details": {
+                "player_info": {
+                    "played_card": card,
+                    "cards": activeRooms[roomId].gameInstance.players[socket.user].cards
+                }
+            }
+        };
+
+        socket.emit("cardPlayed", responseMessage);
+
+        Object.keys(room.gameInstance.players).forEach(username => {
+            const socketId = room.gameInstance.players[username].socketId;
+            const nextPlayerUsername = Object.keys(room.gameInstance.players)[((room.gameInstance.nextPlayerIndex - 1) % Object.keys(room.gameInstance.players).length) + 1];
+
+            var message = '';
+
+            if (room.gameInstance.status === "awaiting cards") {
+                if (nextPlayerUsername === username) {
+                    message = "Escolha uma carta para jogar"
+                } else {
+                    message = `Vez de ${nextPlayerUsername} escolher uma carta para jogar`
+                };
+
+                const nextMoveResponseMessage = {
+                    "status": "success",
+                    "message": message,
+                    "details": {
+                        "room_info": {
+                            "id": roomId,
+                            "game_status": room.gameInstance.status
+                        }
+                    }
+                };
+
+                io.to(socketId).emit("nextMove", nextMoveResponseMessage);
+            };
+        });
+    } catch (error) {
+        socket.emit("error", {
+            status: "error",
+            message: "Erro ao receber carta",
             details: error.message
         });
     };
