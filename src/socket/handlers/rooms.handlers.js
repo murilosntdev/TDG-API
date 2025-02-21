@@ -1,6 +1,6 @@
 import { validateRoomName } from "../services/validators/roomName.validators.js";
 import { validateRoomId } from "../services/validators/roomId.validators.js";
-import { createGameInstance, addPlayerToGame, removePlayerFromGame, deleteGameInstance } from "./game.handlers.js";
+import { createGameInstance, addPlayerToGame, removePlayerFromGame, deleteGameInstance, startGame } from "./game.handlers.js";
 
 export const activeRooms = {};
 
@@ -247,4 +247,133 @@ export function leaveRoomHandler(socket, body) {
     };
 
     socket.emit("roomLeft", responseMessage);
+};
+
+export function startGameHandler(io, socket, body) {
+    const roomId = body.room_id;
+
+    let inputErrors = [];
+
+    if (!roomId) {
+        inputErrors.push({ "room_id": "o campo 'room_id' é obrigatório" });
+    } else {
+        let validRoomId = validateRoomId(roomId, "room_id");
+
+        if (validRoomId != "validRoomId") {
+            inputErrors.push(validRoomId);
+        };
+    };
+
+    if (inputErrors.length > 0) {
+        const responseMessage = {
+            "status": "error",
+            "message": "Erro de input",
+            "details": inputErrors
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    const room = activeRooms[roomId];
+
+    if (!room) {
+        const responseMessage = {
+            "status": "error",
+            "message": "Sala não encontrada",
+            "details": `A sala '${roomId}' não existe`
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    if (!room.roomInfo.players.includes(socket.user)) {
+        const responseMessage = {
+            "status": "error",
+            "message": "Jogador não pertence a sala",
+            "details": `Não foi possível iniciar jogo na sala '${roomId}'`
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    if (room.gameInstance.status !== "awaiting players") {
+        const responseMessage = {
+            "status": "error",
+            "message": "Jogo ativo",
+            "details": `A sala '${roomId}' já conta com um jogo ativo`
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    try {
+        const updatedGameState = startGame(io, room.gameInstance);
+
+        room.gameInstance = {
+            ...room.gameInstance,
+            round: 1,
+            hand: 1,
+            nextPlayerIndex: 0,
+            predictedHands: {},
+            playedCards: {}
+        };
+
+        Object.keys(room.gameInstance.players).forEach(username => {
+            const socketId = room.gameInstance.players[username].socketId;
+            const lives = room.gameInstance.players[username].lives;
+            const predictedHands = room.gameInstance.players[username].predictedHands;
+            const handsWon = room.gameInstance.players[username].handsWon;
+
+            const gameStartedResponseMessage = {
+                "status": "success",
+                "message": "O jogo começou",
+                "details": {
+                    "room_info": {
+                        "id": roomId,
+                        "game_status": updatedGameState.status
+                    },
+                    "player_info": {
+                        "lives": lives,
+                        "predictedHands": predictedHands,
+                        "handsWon": handsWon
+                    }
+                }
+            };
+
+            io.to(socketId).emit("gameStarted", gameStartedResponseMessage);
+
+            const nextPlayerUsername = Object.keys(room.gameInstance.players)[room.gameInstance.nextPlayerIndex];
+
+            var message = '';
+
+            if (nextPlayerUsername === username) {
+                message = "Diga quantas mãos pretende fazer"
+            } else {
+                message = `Vez de ${nextPlayerUsername} dizer quantas mãos pretende fazer`
+            };
+
+            const nextMoveResponseMessage = {
+                "status": "success",
+                "message": message,
+                "details": {
+                    "room_info": {
+                        "id": roomId,
+                        "game_status": updatedGameState.status
+                    }
+                }
+            };
+
+            io.to(socketId).emit("nextMove", nextMoveResponseMessage);
+        });
+    } catch (error) {
+        socket.emit("error", {
+            status: "error",
+            message: "Erro ao iniciar o jogo",
+            details: error.message
+        });
+    };
 };

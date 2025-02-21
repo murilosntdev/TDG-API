@@ -1,3 +1,5 @@
+import { shuffleDeck } from "../services/deck/deck.utils.js";
+
 export function createGameInstance() {
     return {
         status: "awaiting players",
@@ -24,7 +26,7 @@ export function addPlayerToGame(gameInstance, socket) {
 
 export function removePlayerFromGame(gameInstance, username) {
     if (!gameInstance.players[username]) {
-        throw new Error("O jogador não está no jogo");
+        return ("O jogador não está no jogo");
     };
 
     delete gameInstance.players[username];
@@ -34,4 +36,56 @@ export function deleteGameInstance(gameInstance) {
     gameInstance = {};
 
     return gameInstance;
+};
+
+export function startGame(io, gameInstance) {
+    if (Object.keys(gameInstance.players).length < 2) {
+        throw new Error("O jogo precisa de pelo menos 2 jogadores para começar.");
+    };
+
+    Object.keys(gameInstance.players).forEach(username => {
+        gameInstance.players[username] = {
+            ...gameInstance.players[username],
+            lives: 3,
+            cards: {},
+            predictedHands: 0,
+            handsWon: 0
+        };
+    });
+
+    gameInstance.status = "awaiting predictions";
+
+    distributeCards(gameInstance, 1);
+
+    Object.keys(gameInstance.players).forEach(username => {
+        const socketId = gameInstance.players[username].socketId;
+        const playerCards = gameInstance.players[username].cards;
+
+        const responseMessage = {
+            "status": "success",
+            "message": "Suas cartas foram distribuídas",
+            "details": {
+                "cards": playerCards
+            }
+        };
+
+        io.to(socketId).emit("receiveCards", responseMessage);
+    });
+
+    return gameInstance;
+};
+
+function distributeCards(gameInstance, cardQuantity) {
+    var deck = shuffleDeck();
+
+    Object.keys(gameInstance.players).forEach(username => {
+        const drawnCards = deck.splice(0, cardQuantity);
+        const cardsObject = drawnCards.reduce((obj, card) => {
+            const [key, value] = Object.entries(card)[0];
+            obj[key] = value;
+            return obj;
+        }, {});
+
+        gameInstance.players[username].cards = cardsObject;
+    });
 };
