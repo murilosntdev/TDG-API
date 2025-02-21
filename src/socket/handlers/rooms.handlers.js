@@ -1,6 +1,7 @@
 import { validateRoomName } from "../services/validators/roomName.validators.js";
 import { validateRoomId } from "../services/validators/roomId.validators.js";
-import { createGameInstance, addPlayerToGame, removePlayerFromGame, deleteGameInstance, startGame } from "./game.handlers.js";
+import { createGameInstance, addPlayerToGame, removePlayerFromGame, deleteGameInstance, startGame, handsPrediction } from "./game.handlers.js";
+import { validateHandsQuantity } from "../services/validators/handsQuantity.validators.js";
 
 export const activeRooms = {};
 
@@ -373,6 +374,159 @@ export function startGameHandler(io, socket, body) {
         socket.emit("error", {
             status: "error",
             message: "Erro ao iniciar o jogo",
+            details: error.message
+        });
+    };
+};
+
+export function handsPredictionHandler(io, socket, body) {
+    const roomId = body.room_id;
+    const handsQuantity = body.hands_quantity;
+
+    let inputErrors = [];
+
+    if (!roomId) {
+        inputErrors.push({ "room_id": "o campo 'room_id' é obrigatório" });
+    } else {
+        let validRoomId = validateRoomId(roomId, "room_id");
+
+        if (validRoomId != "validRoomId") {
+            inputErrors.push(validRoomId);
+        };
+    };
+
+    if (handsQuantity === null || handsQuantity === undefined) {
+        inputErrors.push({ "hands_quantity": "o campo 'hands_quantity' é obrigatório" });
+    } else {
+        let validHandsQuantity = validateHandsQuantity(handsQuantity, "hands_quantity");
+
+        if (validHandsQuantity != "validHandsQuantity") {
+            inputErrors.push(validHandsQuantity);
+        };
+    };
+
+    if (inputErrors.length > 0) {
+        const responseMessage = {
+            "status": "error",
+            "message": "Erro de input",
+            "details": inputErrors
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    const room = activeRooms[roomId];
+
+    if (!room) {
+        const responseMessage = {
+            "status": "error",
+            "message": "Sala não encontrada",
+            "details": `A sala '${roomId}' não existe`
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    if (!room.roomInfo.players.includes(socket.user)) {
+        const responseMessage = {
+            "status": "error",
+            "message": "Jogador não pertence a sala",
+            "details": `Não foi possível receber previsões de mãos na sala '${roomId}'`
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    if (room.gameInstance.status !== "awaiting predictions") {
+        const responseMessage = {
+            "status": "error",
+            "message": "Status incompatível",
+            "details": `A sala '${roomId}' não está recebendo previsões de mãos`
+        };
+
+        socket.emit("error", responseMessage);
+        return;
+    };
+
+    try {
+        handsPrediction(room.gameInstance, socket.user, handsQuantity);
+
+        socket.to(roomId).emit("handsPredicted", {
+            "status": "info",
+            "message": `${socket.user} preveu ${handsQuantity} mãos`,
+            "details": {
+                "player_info": {
+                    "username": socket.user,
+                    "hands_predicted": handsQuantity
+                }
+            }
+        });
+
+        const responseMessage = {
+            "status": "success",
+            "message": `Você preveu ${handsQuantity} mãos`,
+            "details": {
+                "player_info": {
+                    "hands_predicted": handsQuantity
+                }
+            }
+        };
+
+        socket.emit("handsPredicted", responseMessage);
+
+        Object.keys(room.gameInstance.players).forEach(username => {
+            const socketId = room.gameInstance.players[username].socketId;
+            const nextPlayerUsername = Object.keys(room.gameInstance.players)[((room.gameInstance.nextPlayerIndex - 1) % Object.keys(room.gameInstance.players).length) + 1];
+
+            var message = '';
+
+            if (room.gameInstance.status === "awaiting predictions") {
+                if (nextPlayerUsername === username) {
+                    message = "Diga quantas mãos pretende fazer"
+                } else {
+                    message = `Vez de ${nextPlayerUsername} dizer quantas mãos pretende fazer`
+                };
+
+                const nextMoveResponseMessage = {
+                    "status": "success",
+                    "message": message,
+                    "details": {
+                        "room_info": {
+                            "id": roomId,
+                            "game_status": room.gameInstance.status
+                        }
+                    }
+                };
+
+                io.to(socketId).emit("nextMove", nextMoveResponseMessage);
+            } else if (room.gameInstance.status === "awaiting cards") {
+                if (nextPlayerUsername === username) {
+                    message = "Escolha uma carta para jogar"
+                } else {
+                    message = `Vez de ${nextPlayerUsername} escolher uma carta para jogar`
+                };
+
+                const nextMoveResponseMessage = {
+                    "status": "success",
+                    "message": message,
+                    "details": {
+                        "room_info": {
+                            "id": roomId,
+                            "game_status": room.gameInstance.status
+                        }
+                    }
+                };
+
+                io.to(socketId).emit("nextMove", nextMoveResponseMessage);
+            };
+        });
+    } catch (error) {
+        socket.emit("error", {
+            status: "error",
+            message: "Erro ao receber previsão de mãos",
             details: error.message
         });
     };

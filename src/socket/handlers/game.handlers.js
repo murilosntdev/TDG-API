@@ -89,3 +89,29 @@ function distributeCards(gameInstance, cardQuantity) {
         gameInstance.players[username].cards = cardsObject;
     });
 };
+
+export function handsPrediction(gameInstance, username, handsQuantity) {
+    const nextPlayerUsername = Object.keys(gameInstance.players)[gameInstance.nextPlayerIndex];
+
+    if (nextPlayerUsername !== username) {
+        throw new Error(`Vez de ${nextPlayerUsername} dizer quantas mãos pretende fazer`);
+    };
+
+    gameInstance.players[username] = {
+        ...gameInstance.players[username],
+        predictedHands: handsQuantity
+    };
+
+    gameInstance.predictedHands[username] = handsQuantity;
+    gameInstance.nextPlayerIndex = (gameInstance.nextPlayerIndex % Object.keys(gameInstance.players).length) + 1;
+
+    if (gameInstance.nextPlayerIndex === Object.keys(gameInstance.players).length) {
+        gameInstance.nextPlayerIndex = 0;
+    };
+
+    if (Object.keys(gameInstance.predictedHands).length === Object.keys(gameInstance.players).length) {
+        gameInstance.status = "awaiting cards";
+    };
+
+    return gameInstance;
+};

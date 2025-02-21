@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { authMiddleware } from "./middlewares/auth.middlewares.js";
-import { createRoomHandler, findRoomsHandler, joinRoomHandler, leaveRoomHandler, startGameHandler } from "./handlers/rooms.handlers.js";
+import { createRoomHandler, findRoomsHandler, handsPredictionHandler, joinRoomHandler, leaveRoomHandler, startGameHandler } from "./handlers/rooms.handlers.js";
 
 export default function initWebSocket(server) {
     const io = new Server(server, {
@@ -34,5 +34,6 @@ export default function initWebSocket(server) {
         socket.on("joinRoom", (body) => joinRoomHandler(socket, body));
         socket.on("leaveRoom", (body) => leaveRoomHandler(socket, body));
         socket.on("startGame", (body) => startGameHandler(io, socket, body));
+        socket.on("handsPrediction", (body) => handsPredictionHandler(io, socket, body));
     });
 };
