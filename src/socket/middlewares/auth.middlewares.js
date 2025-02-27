@@ -3,7 +3,13 @@ import jsonwebtoken, { decode } from "jsonwebtoken";
 const { verify } = jsonwebtoken;
 
 export function authMiddleware(socket, next) {
-    const bearerToken = socket.handshake.query.bearer_token;
+    const cookies = socket.handshake.headers.cookie.split("; ").reduce((acc, cookie) => {
+        const [key, value] = cookie.split("=");
+        acc[key] = value;
+        return acc;
+    }, {});
+
+    const bearerToken = cookies["bearer_token"];
 
     if (!bearerToken) {
         return next(new Error("o parâmetro 'bearer_token' é obrigatório"));
