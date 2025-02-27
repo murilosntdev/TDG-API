@@ -6,7 +6,8 @@ export default function initWebSocket(server) {
     const io = new Server(server, {
         cors: {
             origin: JSON.parse(process.env.CORS_ORIGIN),
-            method: ["GET"]
+            method: ["GET"],
+            credentials: true
         }
     });
 
