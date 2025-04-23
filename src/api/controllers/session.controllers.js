@@ -57,8 +57,8 @@ export const login = async (req, res) => {
     };
 
     res.status(200);
-    res.cookie('bearer_token', jwtBearerToken, { httpOnly: false, secure: true, sameSite: 'None', maxAge: 10800000, path: '/' });
-    res.cookie('refresh_token', refreshToken.rows[0].token, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 2592000000, path: '/' });
+    res.cookie('bearer_token', jwtBearerToken, { httpOnly: false, secure: true, sameSite: 'None', domain: '.trucodagalera.com.br', maxAge: 10800000, path: '/' });
+    res.cookie('refresh_token', refreshToken.rows[0].token, { httpOnly: true, secure: true, sameSite: 'None', domain: '.trucodagalera.com.br', maxAge: 2592000000, path: '/' });
     res.json(successResponse(200, responseDetail));
     return;
 };
@@ -106,8 +106,8 @@ export const refreshToken = async (req, res) => {
     );
 
     res.status(204);
-    res.cookie('bearer_token', jwtBearerToken, { httpOnly: false, secure: true, sameSite: 'None', maxAge: 10800000, path: '/' });
-    res.cookie('refresh_token', refreshToken.rows[0].token, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 2592000000, path: '/' });
+    res.cookie('bearer_token', jwtBearerToken, { httpOnly: false, secure: true, sameSite: 'None', domain: '.trucodagalera.com.br', maxAge: 10800000, path: '/' });
+    res.cookie('refresh_token', refreshToken.rows[0].token, { httpOnly: true, secure: true, sameSite: 'None', domain: '.trucodagalera.com.br', maxAge: 2592000000, path: '/' });
     res.json(successResponse(204));
     return;
 };
