@@ -10,7 +10,7 @@ export const validateUsername = (content, fieldName) => {
     if (content.length < 5 || content.length > 20) {
         return { [fieldName]: `O campo '${fieldName}' deve conter de 5 a 20 caracteres` };
     };
-    if (!regex.exec(content)) {
+    if (!regex.test(content)) {
         return { [fieldName]: `O campo '${fieldName}' contém caracteres inválidos` };
     };
 

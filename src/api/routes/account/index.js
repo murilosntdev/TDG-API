@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { checkInfosPreviousConditions, checkNewAccountPreviousConditions, validadeInfosInput, validateNewAccountInput } from "../../middlewares/account.middlewares.js";
+import { validadeInfosInput, validateNewAccountInput } from "../../middlewares/account/input.js";
+import { checkInfosPreviousConditions, checkNewAccountPreviousConditions } from "../../middlewares/account/conditions.js";
 import { infos, newAccount } from "../../controllers/account.controllers.js";
 
 const accountRouter = Router();

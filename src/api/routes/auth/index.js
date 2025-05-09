@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { checkLoginPreviousConditions, checkLogoutPreviousConditions, checkRefreshTokenPreviousConditions, validadeLoginInput } from "../../middlewares/session.middlewares.js";
+import { validadeLoginInput } from "../../middlewares/auth/input.js";
+import { checkLoginPreviousConditions, checkLogoutPreviousConditions, checkRefreshTokenPreviousConditions } from "../../middlewares/auth/conditions.js";
 import { login, logout, refreshToken } from "../../controllers/session.controllers.js";
 
 const sessionRouter = Router();

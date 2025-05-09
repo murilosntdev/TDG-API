@@ -1,45 +1,10 @@
 import * as bcrypt from "bcrypt";
-import { selectIdByToken, selectIdUsernameEmailPasswordByUsername } from "../models/Session.js";
-import { errorResponse } from "../services/responses/error.responses.js";
-import { validatePassword } from "../services/validators/password.validators.js";
-import { validateUsername } from "../services/validators/username.validators.js";
 import jsonwebtoken from "jsonwebtoken";
-import { cookiesExtractor } from "../services/requests/cookiesExtractor.requests.js";
+import { selectIdByToken, selectIdUsernameEmailPasswordByUsername } from "../../models/Session.js";
+import { cookiesExtractor } from "../../services/requests/cookiesExtractor.requests.js";
+import { errorResponse } from "../../services/responses/error.responses.js";
 
 const { verify, decode } = jsonwebtoken;
-
-export const validadeLoginInput = (req, res, next) => {
-    const username = req.body.username;
-    const password = req.body.password;
-
-    let inputErrors = [];
-
-    if (!username) {
-        inputErrors.push({ username: "O campo 'username' é obrigatório" });
-    } else {
-        let validUsername = validateUsername(username, "username");
-        if (validUsername != "validUsername") {
-            inputErrors.push(validUsername);
-        };
-    };
-
-    if (!password) {
-        inputErrors.push({ password: "O campo 'password' é obrigatório" });
-    } else {
-        let validPassword = validatePassword(password, "password");
-        if (validPassword != "validPassword") {
-            inputErrors.push(validPassword);
-        };
-    };
-
-    if (inputErrors.length > 0) {
-        res.status(422);
-        res.json(errorResponse(422, inputErrors));
-        return;
-    };
-
-    next();
-};
 
 export const checkLoginPreviousConditions = async (req, res, next) => {
     const username = req.body.username;

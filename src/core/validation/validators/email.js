@@ -10,7 +10,7 @@ export const validateEmail = (content, fieldName) => {
     if (content.length < 6 || content.length > 254) {
         return { [fieldName]: `O campo '${fieldName}' deve conter de 6 a 254 caracteres` };
     };
-    if (!regex.exec(content)) {
+    if (!regex.test(content)) {
         return { [fieldName]: `O campo '${fieldName}' deve conter um email válido` };
     };
 

@@ -1,44 +1,21 @@
-export const errorResponse = (statusCode, details, debugInfo) => {
-    const response = {
-        error: {}
-    };
+const statusMessage = {
+    401: "Não Autorizado",
+    403: "Acesso Proibido",
+    404: "Entidade Não Encontrada",
+    409: "Houve Um Conflito No Servidor",
+    422: "Entidade Não Processável",
+    503: "Serviço Indisponível",
+    500: "Erro do Servidor Interno"
+};
 
-    switch (statusCode) {
-        case 401: {
-            response.error.status = 401;
-            response.error.message = "Não Autorizado";
-            break;
-        };
-        case 403: {
-            response.error.status = 403;
-            response.error.message = "Acesso Proibido";
-            break;
+export const errorResponse = (statusCode, details, debugInfo) => {
+    const code = statusMessage[statusCode] ? statusCode : 500;
+
+    const response = {
+        error: {
+            status: code,
+            message: statusMessage[code]
         }
-        case 404: {
-            response.error.status = 404;
-            response.error.message = "Entidade Não Encontrada";
-            break;
-        };
-        case 409: {
-            response.error.status = 409;
-            response.error.message = "Houve Um Conflito No Servidor";
-            break;
-        };
-        case 422: {
-            response.error.status = 422;
-            response.error.message = "Entidade Não Processável";
-            break;
-        };
-        case 503: {
-            response.error.status = 503;
-            response.error.message = "Serviço Indisponível";
-            break;
-        };
-        default: {
-            response.error.status = 500;
-            response.error.message = "Erro do Servidor Interno";
-            break;
-        };
     };
 
     if (details) {
