@@ -9,7 +9,7 @@ export const cookiesExtractor = (req) => {
         )
     ) : {};
 
-    req.body.cookies = cookies;
+    req.cookies = cookies;
 
     return (cookies);
 };

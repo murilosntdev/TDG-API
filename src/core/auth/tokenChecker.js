@@ -1,4 +1,4 @@
-import { selectIdByToken } from "../../models/Session.js";
+import { selectIdByToken } from "../models/Auth.js";
 import jsonwebtoken from "jsonwebtoken";
 
 const { verify } = jsonwebtoken;
@@ -22,16 +22,16 @@ export const bearerTokenChecker = async (bearerToken) => {
         return (result);
     };
 
-    const verifyBlacklist = await selectIdByToken(bearerToken);
+    const blacklistCheck = await selectIdByToken(bearerToken);
 
-    if (verifyBlacklist.dbError) {
+    if (blacklistCheck.dbError) {
         result.status = 503;
-        result.debugInfo = verifyBlacklist;
+        result.debugInfo = blacklistCheck;
 
         return (result);
     };
 
-    if (verifyBlacklist.rows[0]) {
+    if (blacklistCheck.rows[0]) {
         result.status = 401;
         result.detail = ["'bearer_token' expirado ou inválido"];
 

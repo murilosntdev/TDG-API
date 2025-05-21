@@ -1,14 +1,14 @@
 import jsonwebtoken from "jsonwebtoken";
-import { insertIntoBearerTokenBlacklist, insertIntoRefreshToken, updateRevokedByAccountId } from "../models/Session.js";
+import { insertIntoBearerTokenBlacklist, insertIntoRefreshToken, updateRevokedByAccountId } from "../../core/models/Auth.js";
 import { errorResponse } from "../services/responses/error.responses.js";
 import { successResponse } from "../services/responses/success.responses.js";
 
 const { sign } = jsonwebtoken;
 
 export const login = async (req, res) => {
-    const account_id = req.body.account_id;
     const username = req.body.username;
-    const email = req.body.email;
+    const account_id = req.auth.account_id;
+    const email = req.auth.email;
 
     const revokePreviousRefreshToken = await updateRevokedByAccountId(account_id);
 
@@ -64,8 +64,8 @@ export const login = async (req, res) => {
 };
 
 export const refreshToken = async (req, res) => {
-    const account_id = req.body.account_id;
-    const username = req.body.username;
+    const account_id = req.auth.account_id;
+    const username = req.auth.username;
 
     const revokePreviousRefreshToken = await updateRevokedByAccountId(account_id);
 
@@ -113,9 +113,9 @@ export const refreshToken = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-    const account_id = req.body.account_id;
-    const bearerToken = req.body.cookies.bearer_token;
-    const expiration = req.body.expiration;
+    const bearerToken = req.cookies.bearer_token;
+    const expiration = req.auth.expiration;
+    const account_id = req.auth.account_id;
 
     const bearerTokenBlacklist = await insertIntoBearerTokenBlacklist(bearerToken, expiration);
 

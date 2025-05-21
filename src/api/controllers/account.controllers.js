@@ -1,5 +1,5 @@
 import * as bcrypt from "bcrypt";
-import { insertIntoAccount, selectInfosById } from "../models/Account.js";
+import { insertIntoAccount, selectInfosById } from "../../core/models/Account.js";
 import { successResponse } from "../services/responses/success.responses.js";
 import { errorResponse } from "../services/responses/error.responses.js";
 
@@ -32,7 +32,7 @@ export const newAccount = async (req, res) => {
 };
 
 export const infos = async (req, res) => {
-    const account_id = req.body.account_id;
+    const account_id = req.auth.account_id;
 
     const accountInfos = await selectInfosById(account_id);
 
