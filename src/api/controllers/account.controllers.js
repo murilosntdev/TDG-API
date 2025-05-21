@@ -8,7 +8,7 @@ export const newAccount = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    const hashPassword = bcrypt.hashSync(password, 10);
+    const hashPassword = await bcrypt.hash(password, 10);
 
     const insertData = await insertIntoAccount(username, email, hashPassword);
 
@@ -41,7 +41,6 @@ export const infos = async (req, res) => {
         res.json(errorResponse(503, null, accountInfos));
         return;
     };
-
 
     if (!accountInfos.rows[0]) {
         res.status(404);
