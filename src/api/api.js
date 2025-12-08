@@ -19,7 +19,7 @@ api.use(cors({
 api.get("/", (req, res) => {
     res.status(200).json({
         "status": "200",
-        "message": "Bem-vindo à API Truco da Galera",
+        "message": "Welcome to the Truco da Galera API",
         "details": {
             "operating_status": "online",
             "version": process.env.SYSTEM_API_VERSION,
@@ -36,7 +36,7 @@ api.use((req, res) => {
     res.status(404).json({
         "error": {
             "status": 404,
-            "message": "Rota Não Encontrada"
+            "message": "Route not found"
         }
     });
 });

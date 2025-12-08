@@ -8,7 +8,7 @@ export const bearerTokenChecker = async (bearerToken) => {
 
     if (!bearerToken) {
         result.status = 401;
-        result.detail = ["O cookie 'bearer_token' é obrigatório"];
+        result.detail = ["The 'bearer_token' cookie is required"];
 
         return (result);
     };
@@ -17,7 +17,7 @@ export const bearerTokenChecker = async (bearerToken) => {
         verify(bearerToken, process.env.JWT_BEARER_TOKEN_KEY);
     } catch (error) {
         result.status = 401;
-        result.detail = ["'bearer_token' expirado ou inválido"];
+        result.detail = ["'bearer_token' is expired or invalid"];
 
         return (result);
     };
@@ -33,7 +33,7 @@ export const bearerTokenChecker = async (bearerToken) => {
 
     if (blacklistCheck.rows[0]) {
         result.status = 401;
-        result.detail = ["'bearer_token' expirado ou inválido"];
+        result.detail = ["'bearer_token' is expired or invalid"];
 
         return (result);
     };

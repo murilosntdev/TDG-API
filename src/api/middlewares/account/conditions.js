@@ -14,7 +14,7 @@ export const checkNewAccountPreviousConditions = async (req, res, next) => {
         res.status(503).json(errorResponse(503, null, checkUsernameExistence));
         return;
     } else if (checkUsernameExistence.rows[0]) {
-        res.status(409).json(errorResponse(409, "Este username já está em uso"));
+        res.status(409).json(errorResponse(409, "This username is already in use"));
         return;
     };
 
@@ -24,7 +24,7 @@ export const checkNewAccountPreviousConditions = async (req, res, next) => {
         res.status(503).json(errorResponse(503, null, checkEmailExistence));
         return;
     } else if (checkEmailExistence.rows[0]) {
-        res.status(409).json(errorResponse(409, "Este email já está em uso"));
+        res.status(409).json(errorResponse(409, "This email is already in use"));
         return;
     };
 
@@ -45,7 +45,7 @@ export const checkInfosPreviousConditions = async (req, res, next) => {
     const decodedBearerToken = decode(bearerToken, process.env.JWT_BEARER_TOKEN_KEY);
 
     if (req.query.username !== decodedBearerToken.username) {
-        res.status(403).json(errorResponse(403, "Você não possúi permissão para acessar a entidade"));
+        res.status(403).json(errorResponse(403, "You do not have permission to access this entity"));
         return;
     };
 

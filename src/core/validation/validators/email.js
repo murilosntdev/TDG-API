@@ -2,16 +2,16 @@ export const validateEmail = (content, fieldName) => {
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     if (typeof content !== "string") {
-        return { [fieldName]: `O campo '${fieldName}' deve ser uma string` };
+        return { [fieldName]: `The '${fieldName}' field must be a string` };
     };
     if (content.trim() === "") {
-        return { [fieldName]: `O campo '${fieldName}' é obrigatório` };
+        return { [fieldName]: `The '${fieldName}' field is required` };
     };
     if (content.length < 6 || content.length > 254) {
-        return { [fieldName]: `O campo '${fieldName}' deve conter de 6 a 254 caracteres` };
+        return { [fieldName]: `The '${fieldName}' field must be between 6 and 254 characters` };
     };
     if (!regex.test(content)) {
-        return { [fieldName]: `O campo '${fieldName}' deve conter um email válido` };
+        return { [fieldName]: `The '${fieldName}' field must contain a valid email address` };
     };
 
     return 'validEmail';

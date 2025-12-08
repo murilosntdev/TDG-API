@@ -3,10 +3,10 @@ import { validadeLoginInput } from "../../middlewares/auth/input.js";
 import { checkLoginPreviousConditions, checkLogoutPreviousConditions, checkRefreshTokenPreviousConditions } from "../../middlewares/auth/conditions.js";
 import { login, logout, refreshToken } from "../../controllers/auth.controllers.js";
 
-const sessionRouter = Router();
+const authRouter = Router();
 
-sessionRouter.post("/login", validadeLoginInput, checkLoginPreviousConditions, login);
-sessionRouter.post("/refreshToken", checkRefreshTokenPreviousConditions, refreshToken);
-sessionRouter.post("/logout", checkLogoutPreviousConditions, logout);
+authRouter.post("/login", validadeLoginInput, checkLoginPreviousConditions, login);
+authRouter.post("/refreshToken", checkRefreshTokenPreviousConditions, refreshToken);
+authRouter.post("/logout", checkLogoutPreviousConditions, logout);
 
-export default sessionRouter;
+export default authRouter;

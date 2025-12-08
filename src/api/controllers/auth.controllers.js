@@ -49,7 +49,7 @@ export const login = async (req, res) => {
     );
 
     const responseDetail = {
-        "result": "Acesso Garantido",
+        "result": "Access Granted",
         "account_info": {
             "username": username,
             "email": email

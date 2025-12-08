@@ -1,9 +1,9 @@
 export const validateStringField = (content, fieldName) => {
     if (typeof content !== "string") {
-        return { [fieldName]: `O campo '${fieldName}' deve conter uma string` };
+        return { [fieldName]: `The '${fieldName}' field must be a string` };
     };
     if (content.trim() === "") {
-        return { [fieldName]: `O campo '${fieldName}' é obrigatório` };
+        return { [fieldName]: `The '${fieldName}' field is required` };
     };
 
     return 'validString';

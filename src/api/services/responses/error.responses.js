@@ -1,11 +1,11 @@
 const statusMessage = {
-    401: "Não Autorizado",
-    403: "Acesso Proibido",
-    404: "Entidade Não Encontrada",
-    409: "Houve Um Conflito No Servidor",
-    422: "Entidade Não Processável",
-    503: "Serviço Indisponível",
-    500: "Erro do Servidor Interno"
+    401: "Unauthorized",
+    403: "Forbidden",
+    404: "Not found",
+    409: "Conflict",
+    422: "Unprocessable content",
+    503: "Service unavailable",
+    500: "Internal server error"
 };
 
 export const errorResponse = (statusCode, details, debugInfo) => {

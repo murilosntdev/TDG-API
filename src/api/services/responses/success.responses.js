@@ -1,22 +1,15 @@
-export const successResponse = (statusCode, details) => {
-    const response = {};
+const statusMessage = {
+    200: "OK",
+    201: "Created",
+    204: "No content"
+};
 
-    switch (statusCode) {
-        case 200: {
-            response.status = 200;
-            response.message = "OK";
-            break;
-        };
-        case 201: {
-            response.status = 201;
-            response.message = "Entidade Criada";
-            break;
-        };
-        default: {
-            response.status = 204;
-            response.message = "Sem Conteúdo";
-            break;
-        };
+export const successResponse = (statusCode, details) => {
+    const code = statusMessage[statusCode] ? statusCode : 204;
+
+    const response = {
+        status: code,
+        message: statusMessage[code]
     };
 
     if (details) {

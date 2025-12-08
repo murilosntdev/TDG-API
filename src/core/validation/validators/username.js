@@ -2,16 +2,16 @@ export const validateUsername = (content, fieldName) => {
     const regex = /^[a-zA-Z][a-zA-Z0-9._-]*$/;
 
     if (typeof content !== "string") {
-        return { [fieldName]: `O campo '${fieldName}' deve ser uma string` };
+        return { [fieldName]: `The '${fieldName}' field must be a string` };
     };
     if (content.trim() === "") {
-        return { [fieldName]: `O campo '${fieldName}' é obrigatório` };
+        return { [fieldName]: `The '${fieldName}' field is required` };
     };
     if (content.length < 5 || content.length > 20) {
-        return { [fieldName]: `O campo '${fieldName}' deve conter de 5 a 20 caracteres` };
+        return { [fieldName]: `The '${fieldName}' field must be between 5 and 20 characters` };
     };
     if (!regex.test(content)) {
-        return { [fieldName]: `O campo '${fieldName}' contém caracteres inválidos` };
+        return { [fieldName]: `The '${fieldName}' field contains invalid characters` };
     };
 
     return 'validUsername';

@@ -19,7 +19,7 @@ export const newAccount = async (req, res) => {
     };
 
     const responseDetail = {
-        "result": "Usuario criado com sucesso",
+        "result": "User created successfully",
         "account_info": {
             "username": insertData.rows[0].username,
             "email": insertData.rows[0].email
