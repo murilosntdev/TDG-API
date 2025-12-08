@@ -8,16 +8,16 @@ describe('Validator: validateStringField', () => {
             expect(validateStringField(string, 'string')).toBe('validString');
         });
     });
-    
+
     it('should return an error object for non-string inputs', () => {
         const nonStringInput = 12345;
-        const expectedError = { string: "O campo 'string' deve conter uma string" };
+        const expectedError = { string: "The 'string' field must be a string" };
         expect(validateStringField(nonStringInput, 'string')).toEqual(expectedError);
     });
-    
+
     it('should return an error object for empty or whitespace-only string fields', () => {
         const emptyString = '   ';
-        const expectedError = { string: "O campo 'string' é obrigatório" };
+        const expectedError = { string: "The 'string' field is required" };
         expect(validateStringField(emptyString, 'string')).toEqual(expectedError);
     });
 });

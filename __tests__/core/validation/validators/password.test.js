@@ -8,34 +8,34 @@ describe('Validator: validatePassword', () => {
             expect(validatePassword(password, 'password')).toBe('validPassword');
         });
     });
-    
+
     it('should return an error object for non-string inputs', () => {
         const nonStringInput = 12345;
-        const expectedError = { password: "O campo 'password' deve ser uma string" };
+        const expectedError = { password: "The 'password' field must be a string" };
         expect(validatePassword(nonStringInput, 'password')).toEqual(expectedError);
     });
-    
+
     it('should return an error object for empty or whitespace-only passwords', () => {
         const emptyPassword = '   ';
-        const expectedError = { password: "O campo 'password' é obrigatório" };
+        const expectedError = { password: "The 'password' field is required" };
         expect(validatePassword(emptyPassword, 'password')).toEqual(expectedError);
     });
 
     it('should return an error object for passwords that are too short', () => {
         const shortPassword = 'abcdefg';
-        const expectedError = { password: "O campo 'password' deve conter de 8 a 15 caracteres" };
+        const expectedError = { password: "The 'password' field must be between 8 and 15 characters" };
         expect(validatePassword(shortPassword, 'password')).toEqual(expectedError);
     });
 
     it('should return an error object for passwords that are too long', () => {
         const longPassword = 'a'.repeat(16);
-        const expectedError = { password: "O campo 'password' deve conter de 8 a 15 caracteres" };
+        const expectedError = { password: "The 'password' field must be between 8 and 15 characters" };
         expect(validatePassword(longPassword, 'password')).toEqual(expectedError);
     });
 
     it('should return an error object for non-valid passwords', () => {
         const invalidPasswords = ['testpass', 'qwerty123456', 'PASS@#$%'];
-        const expectedError = { password: "O campo 'password' deve conter uma senha válida" };
+        const expectedError = { password: "The 'password' field must contain at least one uppercase letter, one lowercase letter, and one number" };
         invalidPasswords.forEach(password => {
             expect(validatePassword(password, 'password')).toEqual(expectedError);
         });

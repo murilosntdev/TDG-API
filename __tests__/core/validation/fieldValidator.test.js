@@ -5,7 +5,7 @@ describe('Validator: validateField', () => {
 
     it('should return a required field error if no value is provided', () => {
         const fieldName = 'testField';
-        const expectedError = { [fieldName]: `O campo '${fieldName}' é obrigatório` };
+        const expectedError = { [fieldName]: `The '${fieldName}' field is required` };
 
         const mockValidator = jest.fn();
 
@@ -29,7 +29,7 @@ describe('Validator: validateField', () => {
     it('should return an error object from the validator function on failed validation', () => {
         const fieldValue = 'invalid-value';
         const fieldName = 'testField';
-        const errorFromValidator = { [fieldName]: 'Valor inválido' };
+        const errorFromValidator = { [fieldName]: 'Invalid Value' };
 
         const mockValidator = jest.fn().mockReturnValue(errorFromValidator);
 

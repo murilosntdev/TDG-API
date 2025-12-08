@@ -16,7 +16,7 @@ describe('Service: successResponse', () => {
         const response = successResponse(201, details);
         expect(response).toEqual({
             status: 201,
-            message: "Entidade Criada",
+            message: "Created",
             details: {
                 userId: 1,
                 username: 'test'
@@ -28,7 +28,7 @@ describe('Service: successResponse', () => {
         const response = successResponse(299);
         expect(response).toEqual({
             status: 204,
-            message: "Sem Conteúdo"
+            message: "No content"
         });
     });
 });
@@ -48,7 +48,7 @@ describe('Service: errorResponse', () => {
         expect(response).toEqual({
             error: {
                 status: 404,
-                message: "Entidade Não Encontrada"
+                message: "Not found"
             }
         });
     });
@@ -59,7 +59,7 @@ describe('Service: errorResponse', () => {
         expect(response).toEqual({
             error: {
                 status: 422,
-                message: "Entidade Não Processável",
+                message: "Unprocessable content",
                 details: [{
                     field: 'email',
                     message: 'invalid format'
@@ -71,7 +71,7 @@ describe('Service: errorResponse', () => {
     it('should return a 500 Internal Server Error for an unhandled error status code', () => {
         const response = errorResponse(999);
         expect(response.error.status).toBe(500);
-        expect(response.error.message).toBe("Erro do Servidor Interno");
+        expect(response.error.message).toBe("Internal server error");
     });
 
     it('should not include debugInfo if SYSTEM_SHOW_DEBUG_INFO is not "true"', () => {
