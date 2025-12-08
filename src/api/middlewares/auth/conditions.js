@@ -1,7 +1,7 @@
 import * as bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
 import { cookiesExtractor } from "../../../core/auth/cookiesExtractor.js";
-import { selectIdByToken, selectIdUsernameEmailPasswordByUsername } from "../../../core/models/Auth.js";
+import { selectIdByToken, selectCredentialsByUsername } from "../../../core/models/Auth.js";
 import { errorResponse } from "../../services/responses/error.responses.js";
 
 const { verify, decode } = jsonwebtoken;
@@ -12,7 +12,7 @@ export const checkLoginPreviousConditions = async (req, res, next) => {
 
     let recuperedPassword;
 
-    const checkAccountExistence = await selectIdUsernameEmailPasswordByUsername(username);
+    const checkAccountExistence = await selectCredentialsByUsername(username);
 
     if (checkAccountExistence.dbError) {
         res.status(503).json(errorResponse(503, null, checkAccountExistence));

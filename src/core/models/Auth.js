@@ -1,6 +1,6 @@
 import { dbExecute } from "../database/db.js";
 
-export const selectIdUsernameEmailPasswordByUsername = async (username) => {
+export const selectCredentialsByUsername = async (username) => {
     let query = "SELECT id, username, email, password FROM account WHERE (username = $1)";
     let result = await dbExecute(query, [username]);
 
