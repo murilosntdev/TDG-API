@@ -1,7 +1,9 @@
 import jsonwebtoken from "jsonwebtoken";
-import { insertIntoBearerTokenBlacklist, insertIntoRefreshToken, updateRevokedByAccountId } from "../../core/models/Auth.js";
+import { insertIntoBearerTokenBlacklist, insertIntoRefreshToken, updatePasswordResetTokenRevokedByAccountId, updateRevokedByAccountId } from "../../core/models/Auth.js";
 import { errorResponse } from "../services/responses/error.responses.js";
 import { successResponse } from "../services/responses/success.responses.js";
+import { createResetPasswordToken } from "../services/auth/tokenCreator.js";
+import { sendMail } from "../../core/email/email.js";
 
 const { sign } = jsonwebtoken;
 
@@ -137,4 +139,51 @@ export const logout = async (req, res) => {
     res.cookie('bearer_token', '', { httpOnly: false, secure: true, sameSite: 'None', expires: new Date(0), path: '/' });
     res.cookie('refresh_token', '', { httpOnly: true, secure: true, sameSite: 'None', expires: new Date(0), path: '/' });
     res.json(successResponse(204));
+};
+
+export const passwordReset = async (req, res) => {
+    const email = req.body.email;
+    const account_id = req.auth.account_id;
+    const username = req.auth.username;
+
+    const revokePreviousPasswordResetToken = await updatePasswordResetTokenRevokedByAccountId(account_id);
+
+    if (revokePreviousPasswordResetToken.dbError) {
+        res.status(503);
+        res.json(errorResponse(503, null, revokePreviousPasswordResetToken));
+        return;
+    };
+
+    const token = await createResetPasswordToken(account_id);
+
+    if (token.dbError) {
+        res.status(503);
+        res.json(errorResponse(503, null, token));
+        return;
+    };
+
+    const templateContext = {
+        name: username,
+        passwordResetLink: `https://${process.env.SPA_BASE_DOMAIN}/password-reset?token=${token}`
+    };
+
+    const emailResult = await sendMail(email, 'Redefina sua senha', 'passwordReset', templateContext);
+
+    if (emailResult.emailError) {
+        await updatePasswordResetTokenRevokedByAccountId(account_id);
+        res.status(503);
+        res.json(errorResponse(503, null, emailResult));
+        return;
+    };
+
+    const responseDetail = {
+        "result": "Email sent",
+        "account_info": {
+            "email": email
+        }
+    };
+
+    res.status(201);
+    res.json(successResponse(201, responseDetail));
+    return;
 };

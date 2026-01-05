@@ -1,7 +1,7 @@
 import * as bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
 import { cookiesExtractor } from "../../../core/auth/cookiesExtractor.js";
-import { selectIdByToken, selectCredentialsByUsername } from "../../../core/models/Auth.js";
+import { selectIdByToken, selectCredentialsByEmail, selectCredentialsByUsername, selectPasswordResetTokenIdExpirationByAccountId } from "../../../core/models/Auth.js";
 import { errorResponse } from "../../services/responses/error.responses.js";
 
 const { verify, decode } = jsonwebtoken;
@@ -98,6 +98,42 @@ export const checkLogoutPreviousConditions = async (req, res, next) => {
     if (!req.auth) req.auth = {};
     req.auth.account_id = decodedBearerToken.account_id;
     req.auth.expiration = decodedBearerToken.exp;
+
+    next();
+};
+
+export const checkPasswordResetPreviousConditions = async (req, res, next) => {
+    const email = req.body.email;
+
+    const checkAccountExistence = await selectCredentialsByEmail(email);
+
+    if (checkAccountExistence.dbError) {
+        res.status(503).json(errorResponse(503, null, checkAccountExistence));
+        return;
+    } else if (!checkAccountExistence.rows[0]) {
+        res.status(404).json(errorResponse(404, "No account is associated with this email"));
+        return;
+    };
+
+    const checkTokenExistence = await selectPasswordResetTokenIdExpirationByAccountId(checkAccountExistence.rows[0].id);
+
+    if (checkTokenExistence.dbError) {
+        res.status(503).json(errorResponse(503, null, checkTokenExistence));
+        return;
+    };
+
+    const actualTime = new Date();
+    actualTime.setTime(actualTime.getTime());
+
+    if (checkTokenExistence.rows[0] && checkTokenExistence.rows[0].expiration > actualTime) {
+        res.status(400);
+        res.json(errorResponse(400, "There is still an active reset link for the account provided"));
+        return;
+    };
+
+    if (!req.auth) req.auth = {};
+    req.auth.account_id = checkAccountExistence.rows[0].id;
+    req.auth.username = checkAccountExistence.rows[0].username;
 
     next();
 };
