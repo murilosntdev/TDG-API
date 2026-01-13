@@ -1,14 +1,14 @@
 import { dbExecute } from "../database/db.js";
 
 export const selectCredentialsByUsername = async (username) => {
-    let query = "SELECT id, username, email, password FROM account WHERE (username = $1)";
+    let query = "SELECT id, username, email, password FROM account WHERE (LOWER(username) = LOWER($1))";
     let result = await dbExecute(query, [username]);
 
     return (result);
 };
 
 export const selectCredentialsByEmail = async (email) => {
-    let query = "SELECT id, username, email, password FROM account WHERE (email = $1)";
+    let query = "SELECT id, username, email, password FROM account WHERE (LOWER(email) = LOWER($1))";
     let result = await dbExecute(query, [email]);
 
     return (result);

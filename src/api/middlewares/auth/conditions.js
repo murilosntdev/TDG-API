@@ -35,6 +35,7 @@ export const checkLoginPreviousConditions = async (req, res, next) => {
     if (!req.auth) req.auth = {};
     req.auth.account_id = checkAccountExistence.rows[0].id;
     req.auth.email = checkAccountExistence.rows[0].email;
+    req.auth.username = checkAccountExistence.rows[0].username;
 
     next();
 };

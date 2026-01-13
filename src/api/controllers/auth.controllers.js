@@ -9,7 +9,7 @@ import { sendMail } from "../../core/email/email.js";
 const { sign } = jsonwebtoken;
 
 export const login = async (req, res) => {
-    const username = req.body.username;
+    const username = req.auth.username;
     const account_id = req.auth.account_id;
     const email = req.auth.email;
 
