@@ -12,7 +12,14 @@ export const selectCredentialsByEmail = async (email) => {
     let result = await dbExecute(query, [email]);
 
     return (result);
-}
+};
+
+export const updatePasswordByAccountId = async (password, account_id) => {
+    let query = "UPDATE account SET password = $1 WHERE id = $2";
+    let result = await dbExecute(query, [password, account_id]);
+
+    return (result);
+};
 
 export const updateRevokedByAccountId = async (account_id) => {
     let query = "UPDATE refresh_token SET revoked = true WHERE (account_id = $1) AND (revoked = false)";
@@ -65,6 +72,13 @@ export const updatePasswordResetTokenRevokedByAccountId = async (account_id) => 
 export const selectPasswordResetTokenIdExpirationByAccountId = async (account_id) => {
     let query = "SELECT id, expiration FROM password_reset_token WHERE (account_id = $1) AND (revoked = false) ORDER BY id DESC LIMIT 1";
     let result = await dbExecute(query, [account_id]);
+
+    return (result);
+};
+
+export const selectAccountIdExpirationByTokenHash = async (token_hash) => {
+    let query = "SELECT account_id, expiration FROM password_reset_token WHERE (token_hash = $1) AND (revoked = false) ORDER BY id DESC LIMIT 1";
+    let result = await dbExecute(query, [token_hash]);
 
     return (result);
 };

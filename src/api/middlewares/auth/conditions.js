@@ -3,6 +3,7 @@ import jsonwebtoken from "jsonwebtoken";
 import { cookiesExtractor } from "../../../core/auth/cookiesExtractor.js";
 import { selectIdByToken, selectCredentialsByEmail, selectCredentialsByUsername, selectPasswordResetTokenIdExpirationByAccountId } from "../../../core/models/Auth.js";
 import { errorResponse } from "../../services/responses/error.responses.js";
+import { headerTokenChecker } from "../../../core/auth/tokenChecker.js";
 
 const { verify, decode } = jsonwebtoken;
 
@@ -134,6 +135,21 @@ export const checkPasswordResetPreviousConditions = async (req, res, next) => {
     if (!req.auth) req.auth = {};
     req.auth.account_id = checkAccountExistence.rows[0].id;
     req.auth.username = checkAccountExistence.rows[0].username;
+
+    next();
+};
+
+export const checkPatchPasswordResetPreviousConditions = async (req, res, next) => {
+    const token = req.headers.authtoken;
+    const validToken = await headerTokenChecker(token, "authToken");
+
+    if (validToken.status !== 'validHeaderToken') {
+        res.status(validToken.status).json(errorResponse(validToken.status, validToken.detail, validToken.debugInfo));
+        return;
+    };
+
+    if (!req.auth) req.auth = {};
+    req.auth.account_id = validToken.account_id;
 
     next();
 };

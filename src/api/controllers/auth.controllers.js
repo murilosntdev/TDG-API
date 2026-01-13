@@ -1,5 +1,6 @@
+import * as bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
-import { insertIntoBearerTokenBlacklist, insertIntoRefreshToken, updatePasswordResetTokenRevokedByAccountId, updateRevokedByAccountId } from "../../core/models/Auth.js";
+import { insertIntoBearerTokenBlacklist, insertIntoRefreshToken, updatePasswordByAccountId, updatePasswordResetTokenRevokedByAccountId, updateRevokedByAccountId } from "../../core/models/Auth.js";
 import { errorResponse } from "../services/responses/error.responses.js";
 import { successResponse } from "../services/responses/success.responses.js";
 import { createResetPasswordToken } from "../services/auth/tokenCreator.js";
@@ -185,5 +186,30 @@ export const passwordReset = async (req, res) => {
 
     res.status(201);
     res.json(successResponse(201, responseDetail));
+    return;
+};
+
+export const patchPasswordReset = async (req, res) => {
+    const account_id = req.auth.account_id;
+    const newPassword = req.body.new_password;
+
+    const revokePasswordResetToken = await updatePasswordResetTokenRevokedByAccountId(account_id);
+
+    if (revokePasswordResetToken.dbError) {
+        res.status(503);
+        res.json(errorResponse(503, null, revokePasswordResetToken));
+        return;
+    };
+
+    const hashPassword = await bcrypt.hash(newPassword, 10);
+    const insertData = await updatePasswordByAccountId(hashPassword, account_id);
+
+    if (insertData.dbError) {
+        res.status(503);
+        res.json(errorResponse(503, null, insertData));
+        return;
+    };
+
+    res.status(204).json(successResponse(204));
     return;
 };
