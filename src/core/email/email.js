@@ -1,6 +1,9 @@
 import * as nodemailer from "nodemailer";
 import path from "path";
 import hbs from "nodemailer-express-handlebars";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const smtp = nodemailer.createTransport({
     host: process.env.NODEMAILER_HOST,
@@ -14,11 +17,11 @@ const smtp = nodemailer.createTransport({
 
 const handleBarsOptions = {
     viewEngine: {
-        extName: ".html",
-        partialsDir: path.resolve("./src/core/email/views"),
+        extName: ".handlebars",
+        partialsDir: path.join(__dirname, "views"),
         defaultLayout: false
     },
-    viewPath: path.resolve("./src/core/email/views"),
+    viewPath: path.join(__dirname, "views"),
     extName: ".handlebars"
 };
 
