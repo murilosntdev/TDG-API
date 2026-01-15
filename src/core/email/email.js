@@ -1,8 +1,11 @@
 import * as nodemailer from "nodemailer";
 import path from "path";
 import hbs from "nodemailer-express-handlebars";
+import { fileURLToPath } from "url";
 
-const viewsPath = path.join(process.cwd(), "src/core/email/views");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const viewsPath = path.join(__dirname, "views");
 
 const smtp = nodemailer.createTransport({
     host: process.env.NODEMAILER_HOST,
@@ -29,7 +32,7 @@ smtp.use("compile", hbs(handleBarsOptions));
 
 export const sendMail = (recipientEmail, subject, template, context) => {
     const configEmail = {
-        from: `Truco da Galera <${process.env.NODEMAILER_HOST}>`,
+        from: `Truco da Galera <${process.env.NODEMAILER_USER}>`,
         to: [recipientEmail],
         subject: subject,
         template: template,

@@ -143,6 +143,7 @@ export const logout = async (req, res) => {
 };
 
 export const passwordReset = async (req, res) => {
+    console.log("--- EXECUTING NEW CODE V2 ---");
     const email = req.body.email;
     const account_id = req.auth.account_id;
     const username = req.auth.username;
