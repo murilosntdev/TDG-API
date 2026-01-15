@@ -12,7 +12,7 @@ api.use(compression());
 api.use(express.json());
 api.use(cors({
     origin: JSON.parse(process.env.CORS_ORIGIN),
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PATCH"],
     credentials: true
 }));
 
